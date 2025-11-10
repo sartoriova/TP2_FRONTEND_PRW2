@@ -7,7 +7,7 @@ CREATE TABLE Jogador (
     id SERIAL CONSTRAINT jog_pk PRIMARY KEY,
     nome VARCHAR(50) NOT NULL,
     salario NUMERIC(10,2) CONSTRAINT jog_ck CHECK (salario > 0),
-    id_time INTEGER CONSTRAINT jog_time_fk REFERENCES Time(id)
+    id_time INTEGER CONSTRAINT jog_time_fk REFERENCES Time(id) ON DELETE CASCADE
 );
 
 CREATE TABLE Campeonato (
@@ -16,8 +16,8 @@ CREATE TABLE Campeonato (
 );
 
 CREATE TABLE Time_Campeonato (
-    id_time INTEGER CONSTRAINT time_camp_time_fk REFERENCES Time(id),
-    id_campeonato INTEGER CONSTRAINT time_camp_camp_fk REFERENCES Campeonato(id),
+    id_time INTEGER CONSTRAINT time_camp_time_fk REFERENCES Time(id) ON DELETE CASCADE,
+    id_campeonato INTEGER CONSTRAINT time_camp_camp_fk REFERENCES Campeonato(id) ON DELETE CASCADE,
     CONSTRAINT time_camp_pk PRIMARY KEY (id_time, id_campeonato)
 );
 

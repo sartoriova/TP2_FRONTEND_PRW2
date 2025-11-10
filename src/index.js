@@ -36,7 +36,7 @@ app.get("/times/:id", async (req, res) => {
     if (r.rows.length > 0) {
       return res.json(r.rows[0]);
     }
-    res.status(404).json("Not found");
+    res.status(404).json({ msg: "Time não encontrado."} );
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
@@ -82,8 +82,6 @@ app.put("/times/:id", async (req, res) => {
 app.delete("/times/:id", async (req, res) => {
   try {
     let id = req.params.id;
-    await db.query("DELETE FROM Jogador WHERE id_time = $1", [id]);
-    await db.query("DELETE FROM Time_Campeonato WHERE id_time = $1", [id]);
     const r = await db.query("DELETE FROM Time WHERE id = $1 RETURNING *", [id]);
     if (r.rows.length === 0) {
       return res.status(404).json({ msg: "Time não encontrado." });
@@ -131,15 +129,17 @@ app.post("/jogadores", async (req, res) => {
 });
 
 app.put("/jogadores/:id", async (req, res) => {
-  try {
+ try {
     const id = req.params.id;
-    const varre = await db.query("SELECT * FROM Jogador WHERE id = $1", [id]);
-    if (varre.rows.length != 0) {
-      const { nome, salario, id_time } = req.body;
-      const r = await db.query("UPDATE Jogador SET nome=$1, salario=$2, id_time=$3 WHERE id=$4 RETURNING *", [nome, salario, id_time, id]);
-      return res.status(200).json(r.rows[0]);
+    const { nome, salario, id_time } = req.body;
+    const r = await db.query(
+      "UPDATE Jogador SET nome=$1, salario=$2, id_time=$3 WHERE id=$4 RETURNING *", 
+      [nome, salario, id_time, id]
+    );
+    if (r.rows.length === 0) {
+      return res.status(404).json({ msg: "Jogador não encontrado" });
     }
-    res.status(404).send("Id não encontrado");
+    res.status(200).json(r.rows[0]);
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
@@ -207,6 +207,28 @@ app.post("/campeonatos", async (req, res) => {
   }
 });
 
+app.post("/campeonatos/:id/times", async (req, res) => {
+  try {
+    const id_campeonato = req.params.id;  
+    const { id_time } = req.body;         
+    
+    const r = await db.query(
+      "INSERT INTO Time_Campeonato (id_time, id_campeonato) VALUES ($1, $2) RETURNING *",
+      [id_time, id_campeonato]
+    );
+    
+    res.status(201).json(r.rows[0]);
+  } catch (err) {
+    if (err.code === '23505') { 
+      return res.status(400).json({ msg: "Time já está neste campeonato" });
+    }
+    if (err.code === '23503') {
+      return res.status(400).json({ msg: "Time ou campeonato não existe" });
+    }
+    res.status(500).json({ msg: err.message });
+  }
+});
+
 app.put("/campeonatos/:id", async (req, res) => {
   try {
     const id = req.params.id;
@@ -224,7 +246,6 @@ app.put("/campeonatos/:id", async (req, res) => {
 app.delete("/campeonatos/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    await db.query("DELETE FROM Time_Campeonato WHERE id_campeonato = $1", [id]);
     const r = await db.query("DELETE FROM Campeonato WHERE id = $1 RETURNING *", [id]);
     if (r.rows.length === 0) {
       return res.status(404).json({ msg: "Campeonato não encontrado." });
