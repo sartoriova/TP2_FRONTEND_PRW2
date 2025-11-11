@@ -30,8 +30,8 @@ express-backend-postgres
 
 1. Clone o repositório:
    ```
-   git clone https://github.com/Trojahn/express_template_docker.git
-   cd express_template_docker
+   git clone https://github.com/C4rloos0/projeto-faculdade-backend
+   cd projeto-faculdade-backend
    ```
    
 2. Configure o banco de dados:
