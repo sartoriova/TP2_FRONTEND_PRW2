@@ -2,6 +2,202 @@ const express = require("express");
 const db = require("../db");
 const router = express.Router();
 
+/**
+ * @swagger
+ * /campeonatos:
+ *   get:
+ *     summary: Retorna todos os campeonatos
+ *     description: Lista todos os campeonatos cadastrados no sistema
+ *     tags: [Campeonatos]
+ *     responses:
+ *       200:
+ *         description: Lista de campeonatos retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   nome:
+ *                     type: string
+ *                     example: "Mundial de clubes"
+ *       500:
+ *         description: Erro interno do servidor
+ */
+
+/**
+ * @swagger
+ * /campeonatos/{id}:
+ *   get:
+ *     summary: Retorna um campeonato específico
+ *     description: Obtém os dados de um campeonato pelo seu ID
+ *     tags: [Campeonatos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do campeonato
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: Campeonato encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 1
+ *                 nome:
+ *                   type: string
+ *                   example: "Mundial de clubes"
+ *       404:
+ *         description: Campeonato não encontrado
+ *       500:
+ *         description: Erro interno do servidor
+ */
+
+/**
+ * @swagger
+ * /campeonatos/{id}/times:
+ *   get:
+ *     summary: Retorna os times de um campeonato
+ *     description: Lista todos os times participantes de um campeonato específico
+ *     tags: [Campeonatos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do campeonato
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: Lista de times retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   nome:
+ *                     type: string
+ *                     example: "Corinthians"
+ *       404:
+ *         description: Nenhum time encontrado para este campeonato
+ *       500:
+ *         description: Erro interno do servidor
+ */
+
+/**
+ * @swagger
+ * /campeonatos:
+ *   post:
+ *     summary: Cria um novo campeonato
+ *     description: Adiciona um novo campeonato ao sistema
+ *     tags: [Campeonatos]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nome
+ *             properties:
+ *               nome:
+ *                 type: string
+ *                 example: "Campeonato Brasileiro"
+ *     responses:
+ *       201:
+ *         description: Campeonato criado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 2
+ *                 nome:
+ *                   type: string
+ *                   example: "Campeonato Brasileiro"
+ *       500:
+ *         description: Erro interno do servidor
+ */
+
+/**
+ * @swagger
+ * /campeonatos/{id}:
+ *   put:
+ *     summary: Atualiza um campeonato
+ *     description: Atualiza os dados de um campeonato existente
+ *     tags: [Campeonatos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do campeonato
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nome
+ *             properties:
+ *               nome:
+ *                 type: string
+ *                 example: "Mundial de Clubes da FIFA"
+ *     responses:
+ *       200:
+ *         description: Campeonato atualizado com sucesso
+ *       404:
+ *         description: Campeonato não encontrado
+ *       500:
+ *         description: Erro interno do servidor
+ */
+
+/**
+ * @swagger
+ * /campeonatos/{id}:
+ *   delete:
+ *     summary: Remove um campeonato
+ *     description: Exclui um campeonato do sistema
+ *     tags: [Campeonatos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do campeonato
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: Campeonato removido com sucesso
+ *       404:
+ *         description: Campeonato não encontrado
+ *       500:
+ *         description: Erro interno do servidor
+ */
+
 router.get("/", async (req, res) => {
   try {
     const r = await db.query("SELECT * FROM Campeonato");
