@@ -25,8 +25,8 @@ app.use(
 
 //--------- Routes e Listen ---------
 
-const routes = require("./routes/rota");
-app.use("/", routes);
+const rotaInicial = require("./routes/rotaInicial");
+app.use("/", rotaInicial);
 app.use("/campeonatos", campeonatos);
 app.use("/jogadores", jogadores);
 app.use("/times", times);
