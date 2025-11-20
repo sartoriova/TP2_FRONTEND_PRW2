@@ -1,21 +1,20 @@
 import { useContext } from "react";
-import { ProductContext } from "./TeamContext";
+import { TeamContext } from "./TeamContext";
 
-function Product(props) {
-    const {setProduct, setEditingProduct, removeProduct} = useContext(ProductContext);
+function Team(props) {
+    const {setTeam, setEditingTeam, removeTeam} = useContext(TeamContext);
 
-    function editProduct(e) {
-        setEditingProduct(true);
+    function editTeam(e) {
+        setEditingTeam(true);
 
         let tr = e.target.parentElement.parentElement;
 
-        let newProduct = {
+        let newTeam = {
             id: e.target.id,
             nome: tr.children[1].innerText,
-            preco: tr.children[2].innerText,
         }
 
-        setProduct(newProduct);
+        setTeam(newTeam);
     }
 
     return (
@@ -23,14 +22,13 @@ function Product(props) {
             <tr>
                 <td>{props.id}</td>
                 <td>{props.name}</td>
-                <td>{props.price}</td>
                 <td>
-                    <button className="btn btn-success" id={props.id} onClick={editProduct}>Editar</button>
-                    <button className="btn btn-danger" id={props.id} onClick={removeProduct}>Remover</button>
+                    <button className="btn btn-success" id={props.id} onClick={editTeam}>Editar</button>
+                    <button className="btn btn-danger" id={props.id} onClick={removeTeam}>Remover</button>
                 </td>
             </tr>
         </>
     )
 }
 
-export default Product;
+export default Team;

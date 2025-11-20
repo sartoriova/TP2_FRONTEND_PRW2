@@ -8,6 +8,7 @@ function ChampionshipList(props) {
                 <tr>
                   <th>ID</th>
                   <th>Nome</th>
+                  <th>Times</th>
                   <th>Opções</th>
                 </tr>
               </thead>
@@ -16,6 +17,7 @@ function ChampionshipList(props) {
                     <Championship
                         key={index}
                         id={championship.id}
+                        teams={props.teams.get(championship.id)}
                         name={championship.nome}
                     />
                 ))}

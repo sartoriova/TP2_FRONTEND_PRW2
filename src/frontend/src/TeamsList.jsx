@@ -1,6 +1,6 @@
-import Product from "./Team";
+import Team from "./Team";
 
-function ProductsList(props) {
+function TeamsList(props) {
     return (
         <>
             <table className="table">
@@ -8,18 +8,16 @@ function ProductsList(props) {
                     <tr>
                         <th>ID</th>
                         <th>Nome</th>
-                        <th>Preço</th>
                         <th>Opções</th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    {props.products.map((product, index) => (
-                        <Product
+                    {props.teams.map((team, index) => (
+                        <Team
                             key={index}
-                            id={product.id}
-                            name={product.nome}
-                            price={product.preco}
+                            id={team.id}
+                            name={team.nome}
                         />
                     ))}
                 </tbody>
@@ -28,4 +26,4 @@ function ProductsList(props) {
     )
 }
 
-export default ProductsList;
+export default TeamsList;

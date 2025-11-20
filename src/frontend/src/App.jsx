@@ -1,25 +1,24 @@
 import "./App.css";
 import axios from "axios";
 import { useState, useEffect } from 'react';
-import ProductsList from "./TeamsList";
-import ProductRegister from "./ProductRegister";
+import TeamsList from "./TeamsList";
+import TeamRegister from "./TeamRegister";
 import ChampionshipRegister from "./ChampionshipRegister";
-import PurchaseRegister from "./PurchaseRegister";
-import { ProductContext } from "./TeamContext";
+import ParticipationRegister from "./ParticipationRegister";
+import { TeamContext } from "./TeamContext";
 import { ChampionshipContext } from "./ChampionshipContext";
 import ChampionshipList from "./ChampionshipsList";
 
 function App() {
   const [championships, setChampionships] = useState([]);
+  const [participations, setParticipations] = useState(new Map());
   const [invalidName, setInvalidName] = useState("");
 
-  const [products, setProducts] = useState([]);
-  const [editingProduct, setEditingProduct] = useState(false);
+  const [teams, setTeams] = useState([]);
+  const [editingTeam, setEditingTeam] = useState(false);
   const [editingChampionship, setEditingChampionship] = useState(false);
-  const [duplicateProduct, setDuplicateProduct] = useState(false);
-  const [product, setProduct] = useState({
+  const [team, setTeam] = useState({
     nome: "",
-    preco: "",
   });
   const [championship, setChampionship] = useState({
     nome: "",
@@ -48,10 +47,31 @@ function App() {
     }
   }
 
-  async function loadProducts() {
+  async function loadTeams() {
     try {
-      let res = await api.get("/produtos");
-      setProducts(res.data);
+      let res = await api.get("/times");
+      setTeams(res.data);
+    } catch (error) {
+      if (error.response) {
+        console.log("Erro de requisição: ", error.response.status);
+      } else if (error.request) {
+        console.log("Timeout");
+      } else {
+        console.error("Erro inesperado: ", error.message);
+      }
+    }
+  }
+
+  async function loadTeamsChampionship() {
+    try {
+      for (const championship of championships) {
+        let res = await api.get(`/campeonatos/${championship.id}/times`);
+        setParticipations(prev => {
+          const novo = new Map(prev);
+          novo.set(championship.id, res.data);
+          return novo;
+        });
+      }
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
@@ -64,8 +84,15 @@ function App() {
   }
 
   useEffect(() => {
+  if (championships.length > 0) {
+    loadTeamsChampionship();
+  }
+  }, [championships]);
+
+
+  useEffect(() => {
     loadChampionships();
-    //loadProducts();
+    loadTeams();
   }, []);
 
   async function registerChampionship(newChampionship) {
@@ -107,23 +134,13 @@ function App() {
     }
   }
 
-  async function registerProduct() {
+  async function registerTeam() {
     try {
-      await api.post("/produtos", product);
-      await loadProducts();
-      await loadChampionships();
-
-      if (duplicateProduct) {
-        setDuplicateProduct(false);
-      }
+      await api.post("/times", team);
+      await loadTeams();
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
-
-        if (error.response.status == 400) {
-          setDuplicateProduct(true);
-          setErrorMessage(error.response.data.msg);
-        }
       } else if (error.request) {
         console.log("Timeout");
       } else {
@@ -132,23 +149,14 @@ function App() {
     }
   }
 
-  async function editProduct() {
+  async function editTeam() {
     try {
-      await api.put(`/produtos/${product.id}`, product);
-      await loadProducts();
+      await api.put(`/times/${team.id}`, team);
+      await loadTeams();
       await loadChampionships();
-
-      if (duplicateProduct) {
-        setDuplicateProduct(false);
-      }
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
-
-        if (error.response.status == 400) {
-          setDuplicateProduct(true);
-          setErrorMessage(error.response.data.msg);
-        }
       } else if (error.request) {
         console.log("Timeout");
       } else {
@@ -160,7 +168,6 @@ function App() {
   async function editChampionship() {
     try {
       await api.put(`/campeonatos/${championship.id}`, championship);
-      //await loadProducts();
       await loadChampionships();
     } catch (error) {
       if (error.response) {
@@ -173,10 +180,10 @@ function App() {
     }
   }
 
-  async function removeProduct(e) {
+  async function removeTeam(e) {
     try {
-      await api.delete(`/produtos/${e.target.id}`);
-      //await loadProducts();
+      await api.delete(`/times/${e.target.id}`);
+      await loadTeams();
       await loadChampionships();
     } catch (error) {
       if (error.response) {
@@ -189,22 +196,13 @@ function App() {
     }
   }
 
-  async function registerPurchase(newPurchase) {
+  async function registerParticipation(newParticipation) {
     try {
-      await api.post("/compras", newPurchase);
+      await api.post("/participacao", newParticipation);
       await loadChampionships();
-
-      if (duplicatePurchase) {
-        setDuplicatePurchase(false);
-      }
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
-
-        if (error.response.status == 400) {
-          setDuplicatePurchase(true);
-          setErrorMessage(error.response.data.msg);
-        }
       } else if (error.request) {
         console.log("Timeout");
       } else {
@@ -213,9 +211,9 @@ function App() {
     }
   }
 
-  async function removePurchaseUser(e) {
+  async function removeTeamChampionship(e) {
     try {
-      await api.delete(`/compras/${e.target.parentElement.id}/${e.target.id}`);
+      await api.delete(`/participacao/${e.target.parentElement.id}/${e.target.id}`);
       await loadChampionships();
     } catch (error) {
       if (error.response) {
@@ -239,27 +237,26 @@ function App() {
             <ChampionshipRegister championship={championship} setChampionship={setChampionship} editingChampionship={editingChampionship} editChampionship={editChampionship} setEditingChampionship={setEditingChampionship} registerChampionship={registerChampionship}></ChampionshipRegister>
             <p hidden={!invalidName} className="error">{errorMessage}</p>
 
-            <h2 className="mt-4">Comprar produto</h2>
-            <PurchaseRegister users={championships} products={products} registerPurchase={registerPurchase}></PurchaseRegister>
+            <h2 className="mt-4">Participação</h2>
+            <ParticipationRegister championships={championships} teams={teams} registerParticipation={registerParticipation}></ParticipationRegister>
             <p hidden={!duplicatePurchase} className="error">{errorMessage}</p>
 
             <h2 className="display-6 text-center mt-4">Lista de Campeonatos</h2>
-            <ChampionshipContext.Provider value={{ setChampionship, setEditingChampionship, removeChampionship }}>
-              <ChampionshipList championships={championships}></ChampionshipList>
+            <ChampionshipContext.Provider value={{ setChampionship, setEditingChampionship, removeChampionship, removeTeamChampionship }}>
+              <ChampionshipList championships={championships} teams={participations}></ChampionshipList>
             </ChampionshipContext.Provider>
           </div>
 
           <div className="col-2"></div>
 
           <div className="col p-1">
-            <h2 className="mt-4">{!editingProduct ? "Cadastrar" : "Editar"} produto</h2>
-            <ProductRegister product={product} setProduct={setProduct} editingProduct={editingProduct} setEditingProduct={setEditingProduct} registerProduct={registerProduct} editProduct={editProduct}></ProductRegister>
-            <p hidden={!duplicateProduct} className="error">{errorMessage}</p>
+            <h2 className="mt-4">{!editingTeam ? "Cadastrar" : "Editar"} Time</h2>
+            <TeamRegister team={team} setTeam={setTeam} editingTeam={editingTeam} setEditingTeam={setEditingTeam} registerTeam={registerTeam} editTeam={editTeam}></TeamRegister>
 
-            <h2 className="display-6 text-center mt-4">Lista de Produtos</h2>
-            <ProductContext.Provider value={{ setProduct, setEditingProduct, removeProduct }}>
-              <ProductsList products={products}></ProductsList>
-            </ProductContext.Provider>
+            <h2 className="display-6 text-center mt-4">Lista de Times</h2>
+            <TeamContext.Provider value={{ setTeam, setEditingTeam, removeTeam }}>
+              <TeamsList teams={teams}></TeamsList>
+            </TeamContext.Provider>
           </div>
 
         </div>

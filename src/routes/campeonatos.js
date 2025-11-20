@@ -255,7 +255,7 @@ router.get("/:id/times", async (req, res) => {
     if (r.rows.length > 0) {
       return res.json(r.rows);
     }
-    res.status(404).json({ msg: "Nenhum time encontrado para esse campeonato" });
+    res.status(200).json({});
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
