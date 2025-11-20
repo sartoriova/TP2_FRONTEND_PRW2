@@ -1,24 +1,28 @@
 import "./App.css";
 import axios from "axios";
 import { useState, useEffect } from 'react';
-import ProductsList from "./ProductsList";
-import UsersList from "./UsersList";
+import ProductsList from "./TeamsList";
 import ProductRegister from "./ProductRegister";
-import UserRegister from "./UserRegister";
+import ChampionshipRegister from "./ChampionshipRegister";
 import PurchaseRegister from "./PurchaseRegister";
-import { ProductContext } from "./ProductContext";
-import { UserContext } from "./UserContext";
+import { ProductContext } from "./TeamContext";
+import { ChampionshipContext } from "./ChampionshipContext";
+import ChampionshipList from "./ChampionshipsList";
 
 function App() {
-  const [users, setUsers] = useState([]);
+  const [championships, setChampionships] = useState([]);
   const [invalidName, setInvalidName] = useState("");
 
   const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(false);
+  const [editingChampionship, setEditingChampionship] = useState(false);
   const [duplicateProduct, setDuplicateProduct] = useState(false);
   const [product, setProduct] = useState({
     nome: "",
     preco: "",
+  });
+  const [championship, setChampionship] = useState({
+    nome: "",
   });
 
   const [duplicatePurchase, setDuplicatePurchase] = useState(false);
@@ -29,10 +33,10 @@ function App() {
     baseURL: "http://localhost:3000"
   });
 
-  async function loadUsers() {
+  async function loadChampionships() {
     try {
-      let res = await api.get("/usuarios");
-      setUsers(res.data);
+      let res = await api.get("/campeonatos");
+      setChampionships(res.data);
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
@@ -60,14 +64,14 @@ function App() {
   }
 
   useEffect(() => {
-    loadUsers();
-    loadProducts();
+    loadChampionships();
+    //loadProducts();
   }, []);
 
-  async function registerUser(newUser) {
+  async function registerChampionship(newChampionship) {
     try {
-      await api.post("/usuarios", newUser);
-      await loadUsers();
+      await api.post("/campeonatos", newChampionship);
+      await loadChampionships();
 
       if (invalidName) {
         setInvalidName(false);
@@ -88,10 +92,10 @@ function App() {
     }
   }
 
-  async function removeUser(e) {
+  async function removeChampionship(e) {
     try {
-      await api.delete(`/usuarios/${e.target.id}`);
-      await loadUsers();
+      await api.delete(`/campeonatos/${e.target.id}`);
+      await loadChampionships();
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
@@ -103,21 +107,11 @@ function App() {
     }
   }
 
-  function calculateTotal(idUser) {
-    let soma = 0;
-
-    users.filter((user) => user.id == idUser)[0].produtos.forEach(product => {
-      soma = soma + product.preco;
-    });
-
-    return soma;
-  }
-
   async function registerProduct() {
     try {
       await api.post("/produtos", product);
       await loadProducts();
-      await loadUsers();
+      await loadChampionships();
 
       if (duplicateProduct) {
         setDuplicateProduct(false);
@@ -142,7 +136,7 @@ function App() {
     try {
       await api.put(`/produtos/${product.id}`, product);
       await loadProducts();
-      await loadUsers();
+      await loadChampionships();
 
       if (duplicateProduct) {
         setDuplicateProduct(false);
@@ -163,11 +157,27 @@ function App() {
     }
   }
 
+  async function editChampionship() {
+    try {
+      await api.put(`/campeonatos/${championship.id}`, championship);
+      //await loadProducts();
+      await loadChampionships();
+    } catch (error) {
+      if (error.response) {
+        console.log("Erro de requisição: ", error.response.status);
+      } else if (error.request) {
+        console.log("Timeout");
+      } else {
+        console.error("Erro inesperado: ", error.message);
+      }
+    }
+  }
+
   async function removeProduct(e) {
     try {
       await api.delete(`/produtos/${e.target.id}`);
-      await loadProducts();
-      await loadUsers();
+      //await loadProducts();
+      await loadChampionships();
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
@@ -182,7 +192,7 @@ function App() {
   async function registerPurchase(newPurchase) {
     try {
       await api.post("/compras", newPurchase);
-      await loadUsers();
+      await loadChampionships();
 
       if (duplicatePurchase) {
         setDuplicatePurchase(false);
@@ -206,7 +216,7 @@ function App() {
   async function removePurchaseUser(e) {
     try {
       await api.delete(`/compras/${e.target.parentElement.id}/${e.target.id}`);
-      await loadUsers();
+      await loadChampionships();
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
@@ -225,18 +235,18 @@ function App() {
         <div className="row">
 
           <div className="col p-1">
-            <h2 className="mt-4">Cadastrar pessoa</h2>
-            <UserRegister registerUser={registerUser}></UserRegister>
+            <h2 className="mt-4">{!editingChampionship ? "Cadastrar" : "Editar"} Campeonato</h2>
+            <ChampionshipRegister championship={championship} setChampionship={setChampionship} editingChampionship={editingChampionship} editChampionship={editChampionship} setEditingChampionship={setEditingChampionship} registerChampionship={registerChampionship}></ChampionshipRegister>
             <p hidden={!invalidName} className="error">{errorMessage}</p>
 
             <h2 className="mt-4">Comprar produto</h2>
-            <PurchaseRegister users={users} products={products} registerPurchase={registerPurchase}></PurchaseRegister>
+            <PurchaseRegister users={championships} products={products} registerPurchase={registerPurchase}></PurchaseRegister>
             <p hidden={!duplicatePurchase} className="error">{errorMessage}</p>
 
-            <h2 className="display-6 text-center mt-4">Lista de Pessoas</h2>
-            <UserContext.Provider value={{ removeUser, removePurchaseUser }}>
-              <UsersList users={users} calculateTotal={calculateTotal}></UsersList>
-            </UserContext.Provider>
+            <h2 className="display-6 text-center mt-4">Lista de Campeonatos</h2>
+            <ChampionshipContext.Provider value={{ setChampionship, setEditingChampionship, removeChampionship }}>
+              <ChampionshipList championships={championships}></ChampionshipList>
+            </ChampionshipContext.Provider>
           </div>
 
           <div className="col-2"></div>
@@ -244,8 +254,7 @@ function App() {
           <div className="col p-1">
             <h2 className="mt-4">{!editingProduct ? "Cadastrar" : "Editar"} produto</h2>
             <ProductRegister product={product} setProduct={setProduct} editingProduct={editingProduct} setEditingProduct={setEditingProduct} registerProduct={registerProduct} editProduct={editProduct}></ProductRegister>
-            <p hidden={!duplicateProduct} className="error">{errorMessage
-            }</p>
+            <p hidden={!duplicateProduct} className="error">{errorMessage}</p>
 
             <h2 className="display-6 text-center mt-4">Lista de Produtos</h2>
             <ProductContext.Provider value={{ setProduct, setEditingProduct, removeProduct }}>

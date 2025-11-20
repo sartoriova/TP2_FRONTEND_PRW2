@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { ProductContext } from "./ProductContext";
+import { ProductContext } from "./TeamContext";
 
 function Product(props) {
     const {setProduct, setEditingProduct, removeProduct} = useContext(ProductContext);
