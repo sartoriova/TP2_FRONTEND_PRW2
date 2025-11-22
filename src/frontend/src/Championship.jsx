@@ -4,14 +4,12 @@ import { ChampionshipContext } from "./ChampionshipContext";
 function Championship(props) {
     const { setChampionship, setEditingChampionship, removeChampionship, removeTeamChampionship } = useContext(ChampionshipContext);
 
-    function editChampionship(e) {
+    function editChampionship() {
         setEditingChampionship(true);
 
-        let tr = e.target.parentElement.parentElement;
-
         let newChampionship = {
-            id: e.target.id,
-            nome: tr.children[1].innerText,
+            id: props.id,
+            nome: props.name,
         }
 
         setChampionship(newChampionship);

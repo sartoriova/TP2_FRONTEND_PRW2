@@ -4,16 +4,14 @@ import { PlayerContext } from "./PlayerContext";
 function Player(props) {
     const {setPlayer, setEditingPlayer, removePlayer} = useContext(PlayerContext);
 
-    function editPlayer(e) {
+    function editPlayer() {
         setEditingPlayer(true);
 
-        let tr = e.target.parentElement.parentElement;
-
         let newPlayer = {
-            id: e.target.id,
-            nome: tr.children[1].innerText,
-            salario: tr.children[2].innerText,
-            id_time: tr.children[3].innerText
+            id: props.id,
+            nome: props.name,
+            salario: props.salary,
+            id_time: props.team_id
         }
 
         setPlayer(newPlayer);

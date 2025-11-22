@@ -4,14 +4,12 @@ import { TeamContext } from "./TeamContext";
 function Team(props) {
     const {setTeam, setEditingTeam, removeTeam} = useContext(TeamContext);
 
-    function editTeam(e) {
+    function editTeam() {
         setEditingTeam(true);
 
-        let tr = e.target.parentElement.parentElement;
-
         let newTeam = {
-            id: e.target.id,
-            nome: tr.children[1].innerText,
+            id: props.id,
+            nome: props.name,
         }
 
         setTeam(newTeam);
