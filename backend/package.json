@@ -2,10 +2,10 @@
   "name": "express-backend-postgres",
   "version": "1.0.0",
   "description": "Base project for backend development using Node, Express, and PostgreSQL.",
-  "main": "src/index.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon --legacy-watch --watch src src/index.js"
+    "start": "node index.js",
+    "dev": "nodemon --legacy-watch --watch index.js"
   },
   "repository": {
     "type": "git",
