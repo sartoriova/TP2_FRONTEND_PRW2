@@ -130,6 +130,7 @@ function App() {
     try {
       await api.put(`/campeonatos/${championship.id}`, championship);
       await loadChampionships();
+      await loadTeams();
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
@@ -186,6 +187,7 @@ function App() {
     try {
       await api.put(`/jogadores/${player.id}`, player);
       await loadPlayers();
+      await loadTeams();
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
@@ -201,6 +203,7 @@ function App() {
     try {
       await api.delete(`/jogadores/${e.target.id}`);
       await loadPlayers();
+      await loadTeams();
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
