@@ -266,7 +266,7 @@ function App() {
 
   return (
     <>
-      <h1 className="p-3 text-center">Lista de compras por usuário</h1>
+      <h1 className="p-3 text-center">Sistema de Campeonatos</h1>
       <div className="container">
         <div className="row">
 
