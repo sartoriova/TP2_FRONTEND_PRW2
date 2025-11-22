@@ -299,7 +299,7 @@ router.get("/:id/jogadores", async (req, res) => {
     if (r.rows.length > 0) {
       return res.json(r.rows);
     }
-    res.status(404).json({ msg: "Nenhum jogador encontrado neste time." });
+    res.status(200).json([]);
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
@@ -319,8 +319,8 @@ router.get("/:id/campeonatos", async (req, res) => {
       return res.json(r.rows);
     }
     res
-      .status(404)
-      .json({ msg: "Nenhum campeonato encontrado para este time." });
+      .status(200)
+      .json([]);
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }

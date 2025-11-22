@@ -14,22 +14,27 @@ import ChampionshipList from "./ChampionshipsList";
 
 function App() {
   const [championships, setChampionships] = useState([]);
-  const [players, setPlayers] = useState([]);
-  const [player, setPlayer] = useState([]);
-  const [invalidName, setInvalidName] = useState("");
-
-  const [teams, setTeams] = useState([]);
-  const [editingTeam, setEditingTeam] = useState(false);
-  const [editingChampionship, setEditingChampionship] = useState(false);
-  const [editingPlayer, setEditingPlayer] = useState(false);
-  const [team, setTeam] = useState({
-    nome: "",
-  });
   const [championship, setChampionship] = useState({
     nome: "",
   });
+  const [editingChampionship, setEditingChampionship] = useState(false);
 
-  const [duplicatePurchase, setDuplicatePurchase] = useState(false);
+  const [players, setPlayers] = useState([]);
+  const [player, setPlayer] = useState({
+    nome: "",
+    salario: "",
+    id_time: ""
+  });
+   const [editingPlayer, setEditingPlayer] = useState(false);
+  const [invalidTeam, setInvalidTeam] = useState(false);
+
+  const [duplicateParticipation, setDuplicateParticipation] = useState(false);
+
+  const [teams, setTeams] = useState([]);
+  const [editingTeam, setEditingTeam] = useState(false);
+  const [team, setTeam] = useState({
+    nome: "",
+  });
 
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -40,22 +45,15 @@ function App() {
   async function loadChampionships() {
     try {
       let res = await api.get("/campeonatos");
-      setChampionships(res.data);
-    } catch (error) {
-      if (error.response) {
-        console.log("Erro de requisição: ", error.response.status);
-      } else if (error.request) {
-        console.log("Timeout");
-      } else {
-        console.error("Erro inesperado: ", error.message);
-      }
-    }
-  }
+      let championships = res.data;
 
-  async function loadTeams() {
-    try {
-      let res = await api.get("/times");
-      setTeams(res.data);
+      for (let championship of championships) {
+        let teams = await api.get(`/campeonatos/${championship.id}/times`);
+
+        championship.times = teams.data;
+      }
+
+      setChampionships(championships);
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
@@ -82,28 +80,59 @@ function App() {
     }
   }
 
+  async function loadTeams() {
+    try {
+      let res = await api.get("/times");
+      let teams = res.data;
+
+      for (let team of teams) {
+        let players = await api.get(`/times/${team.id}/jogadores`);
+        let championships = await api.get(`/times/${team.id}/campeonatos`);
+
+        team.jogadores = players.data;
+        team.campeonatos = championships.data;
+      }
+
+      setTeams(teams);
+    } catch (error) {
+      if (error.response) {
+        console.log("Erro de requisição: ", error.response.status);
+      } else if (error.request) {
+        console.log("Timeout");
+      } else {
+        console.error("Erro inesperado: ", error.message);
+      }
+    }
+  }
+
   useEffect(() => {
     loadChampionships();
-    loadTeams();
     loadPlayers();
+    loadTeams();
   }, []);
 
   async function registerChampionship(newChampionship) {
     try {
       await api.post("/campeonatos", newChampionship);
       await loadChampionships();
-
-      if (invalidName) {
-        setInvalidName(false);
-      }
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
+      } else if (error.request) {
+        console.log("Timeout");
+      } else {
+        console.error("Erro inesperado: ", error.message);
+      }
+    }
+  }
 
-        if (error.response.status == 400) {
-          setInvalidName(true);
-          setErrorMessage(error.response.data.msg);
-        }
+  async function editChampionship() {
+    try {
+      await api.put(`/campeonatos/${championship.id}`, championship);
+      await loadChampionships();
+    } catch (error) {
+      if (error.response) {
+        console.log("Erro de requisição: ", error.response.status);
       } else if (error.request) {
         console.log("Timeout");
       } else {
@@ -116,6 +145,103 @@ function App() {
     try {
       await api.delete(`/campeonatos/${e.target.id}`);
       await loadChampionships();
+      await loadTeams();
+    } catch (error) {
+      if (error.response) {
+        console.log("Erro de requisição: ", error.response.status);
+      } else if (error.request) {
+        console.log("Timeout");
+      } else {
+        console.error("Erro inesperado: ", error.message);
+      }
+    }
+  }
+
+  async function registerPlayer() {
+    try {
+      await api.post("/jogadores", player);
+      await loadPlayers();
+      await loadTeams();
+
+      if (invalidTeam) {
+        setInvalidTeam(false);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log("Erro de requisição: ", error.response.status);
+
+        if (error.response.status == 404) {
+          setInvalidTeam(true);
+          setErrorMessage(error.response.data.msg);
+        }
+      } else if (error.request) {
+        console.log("Timeout");
+      } else {
+        console.error("Erro inesperado: ", error.message);
+      }
+    }
+  }
+
+  async function editPlayer() {
+    try {
+      await api.put(`/jogadores/${player.id}`, player);
+      await loadPlayers();
+    } catch (error) {
+      if (error.response) {
+        console.log("Erro de requisição: ", error.response.status);
+      } else if (error.request) {
+        console.log("Timeout");
+      } else {
+        console.error("Erro inesperado: ", error.message);
+      }
+    }
+  }
+
+  async function removePlayer(e) {
+    try {
+      await api.delete(`/jogadores/${e.target.id}`);
+      await loadPlayers();
+    } catch (error) {
+      if (error.response) {
+        console.log("Erro de requisição: ", error.response.status);
+      } else if (error.request) {
+        console.log("Timeout");
+      } else {
+        console.error("Erro inesperado: ", error.message);
+      }
+    }
+  }
+
+  async function registerParticipation(newParticipation) {
+    try {
+      await api.post("/participacao", newParticipation);
+      await loadChampionships();
+      await loadTeams();
+
+      if (duplicateParticipation) {
+        setDuplicateParticipation(false);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log("Erro de requisição: ", error.response.status);
+
+        if (error.response.status == 400) {
+          setDuplicateParticipation(true);
+          setErrorMessage(error.response.data.msg);
+        }
+      } else if (error.request) {
+        console.log("Timeout");
+      } else {
+        console.error("Erro inesperado: ", error.message);
+      }
+    }
+  }
+
+  async function removeParticipation(e) {
+    try {
+      await api.delete(`/participacao/${e.target.id}/${e.target.parentElement.id}`);
+      await loadChampionships();
+      await loadTeams();
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
@@ -158,100 +284,11 @@ function App() {
     }
   }
 
-  async function editChampionship() {
-    try {
-      await api.put(`/campeonatos/${championship.id}`, championship);
-      await loadChampionships();
-    } catch (error) {
-      if (error.response) {
-        console.log("Erro de requisição: ", error.response.status);
-      } else if (error.request) {
-        console.log("Timeout");
-      } else {
-        console.error("Erro inesperado: ", error.message);
-      }
-    }
-  }
-
   async function removeTeam(e) {
     try {
       await api.delete(`/times/${e.target.id}`);
       await loadTeams();
       await loadChampionships();
-    } catch (error) {
-      if (error.response) {
-        console.log("Erro de requisição: ", error.response.status);
-      } else if (error.request) {
-        console.log("Timeout");
-      } else {
-        console.error("Erro inesperado: ", error.message);
-      }
-    }
-  }
-
-  async function registerParticipation(newParticipation) {
-    try {
-      await api.post("/participacao", newParticipation);
-      await loadChampionships();
-    } catch (error) {
-      if (error.response) {
-        console.log("Erro de requisição: ", error.response.status);
-      } else if (error.request) {
-        console.log("Timeout");
-      } else {
-        console.error("Erro inesperado: ", error.message);
-      }
-    }
-  }
-
-  async function removeTeamChampionship(e) {
-    try {
-      await api.delete(`/participacao/${e.target.id}/${e.target.parentElement.id}`);
-      await loadChampionships();
-    } catch (error) {
-      if (error.response) {
-        console.log("Erro de requisição: ", error.response.status);
-      } else if (error.request) {
-        console.log("Timeout");
-      } else {
-        console.error("Erro inesperado: ", error.message);
-      }
-    }
-  }
-
-  async function registerPlayer() {
-    try {
-      await api.post("/jogadores", player);
-      await loadPlayers();
-    } catch (error) {
-      if (error.response) {
-        console.log("Erro de requisição: ", error.response.status);
-      } else if (error.request) {
-        console.log("Timeout");
-      } else {
-        console.error("Erro inesperado: ", error.message);
-      }
-    }
-  }
-
-  async function editPlayer() {
-    try {
-      await api.put(`/jogadores/${player.id}`, player);
-      await loadPlayers();
-    } catch (error) {
-      if (error.response) {
-        console.log("Erro de requisição: ", error.response.status);
-      } else if (error.request) {
-        console.log("Timeout");
-      } else {
-        console.error("Erro inesperado: ", error.message);
-      }
-    }
-  }
-
-  async function removePlayer(e) {
-    try {
-      await api.delete(`/jogadores/${e.target.id}`);
       await loadPlayers();
     } catch (error) {
       if (error.response) {
@@ -273,14 +310,13 @@ function App() {
           <div className="col p-1">
             <h2 className="mt-4">{!editingChampionship ? "Cadastrar" : "Editar"} Campeonato</h2>
             <ChampionshipRegister championship={championship} setChampionship={setChampionship} editingChampionship={editingChampionship} editChampionship={editChampionship} setEditingChampionship={setEditingChampionship} registerChampionship={registerChampionship}></ChampionshipRegister>
-            <p hidden={!invalidName} className="error">{errorMessage}</p>
 
             <h2 className="mt-4">Participação</h2>
             <ParticipationRegister championships={championships} teams={teams} registerParticipation={registerParticipation}></ParticipationRegister>
-            <p hidden={!duplicatePurchase} className="error">{errorMessage}</p>
+            <p hidden={!duplicateParticipation} className="error">{errorMessage}</p>
 
             <h2 className="display-6 text-center mt-4">Lista de Campeonatos</h2>
-            <ChampionshipContext.Provider value={{ setChampionship, setEditingChampionship, removeChampionship, removeTeamChampionship }}>
+            <ChampionshipContext.Provider value={{ setChampionship, setEditingChampionship, removeChampionship, removeParticipation }}>
               <ChampionshipList championships={championships}></ChampionshipList>
             </ChampionshipContext.Provider>
           </div>
@@ -298,6 +334,7 @@ function App() {
             
             <h2 className="mt-4">{!editingPlayer ? "Cadastrar" : "Editar"} Jogador</h2>
             <PlayerRegister player={player} setPlayer={setPlayer} editingPlayer={editingPlayer} setEditingPlayer={setEditingPlayer} registerPlayer={registerPlayer} editPlayer={editPlayer}></PlayerRegister>
+            <p hidden={!invalidTeam} className="error">{errorMessage}</p>
 
             <h2 className="display-6 text-center mt-4">Lista de Jogadores</h2>
             <PlayerContext.Provider value={{ setPlayer, setEditingPlayer, removePlayer }}>

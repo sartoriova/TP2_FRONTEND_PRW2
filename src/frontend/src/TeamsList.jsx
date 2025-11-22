@@ -8,6 +8,8 @@ function TeamsList(props) {
                     <tr>
                         <th>ID</th>
                         <th>Nome</th>
+                        <th>Jogadores</th>
+                        <th>Campeonatos</th>
                         <th>Opções</th>
                     </tr>
                 </thead>
@@ -18,6 +20,8 @@ function TeamsList(props) {
                             key={index}
                             id={team.id}
                             name={team.nome}
+                            players={team.jogadores}
+                            championships={team.campeonatos}
                         />
                     ))}
                 </tbody>
