@@ -3,6 +3,9 @@ import axios from "axios";
 import { useState, useEffect } from 'react';
 import TeamsList from "./TeamsList";
 import TeamRegister from "./TeamRegister";
+import PlayerRegister from "./PlayerRegister";
+import {PlayerContext} from "./PlayerContext";
+import PlayersList from "./PlayersList";
 import ChampionshipRegister from "./ChampionshipRegister";
 import ParticipationRegister from "./ParticipationRegister";
 import { TeamContext } from "./TeamContext";
@@ -11,12 +14,14 @@ import ChampionshipList from "./ChampionshipsList";
 
 function App() {
   const [championships, setChampionships] = useState([]);
-  const [participations, setParticipations] = useState(new Map());
+  const [players, setPlayers] = useState([]);
+  const [player, setPlayer] = useState([]);
   const [invalidName, setInvalidName] = useState("");
 
   const [teams, setTeams] = useState([]);
   const [editingTeam, setEditingTeam] = useState(false);
   const [editingChampionship, setEditingChampionship] = useState(false);
+  const [editingPlayer, setEditingPlayer] = useState(false);
   const [team, setTeam] = useState({
     nome: "",
   });
@@ -62,16 +67,10 @@ function App() {
     }
   }
 
-  async function loadTeamsChampionship() {
+  async function loadPlayers() {
     try {
-      for (const championship of championships) {
-        let res = await api.get(`/campeonatos/${championship.id}/times`);
-        setParticipations(prev => {
-          const novo = new Map(prev);
-          novo.set(championship.id, res.data);
-          return novo;
-        });
-      }
+      let res = await api.get("/jogadores");
+      setPlayers(res.data);
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
@@ -84,15 +83,9 @@ function App() {
   }
 
   useEffect(() => {
-  if (championships.length > 0) {
-    loadTeamsChampionship();
-  }
-  }, [championships]);
-
-
-  useEffect(() => {
     loadChampionships();
     loadTeams();
+    loadPlayers();
   }, []);
 
   async function registerChampionship(newChampionship) {
@@ -213,8 +206,53 @@ function App() {
 
   async function removeTeamChampionship(e) {
     try {
-      await api.delete(`/participacao/${e.target.parentElement.id}/${e.target.id}`);
+      await api.delete(`/participacao/${e.target.id}/${e.target.parentElement.id}`);
       await loadChampionships();
+    } catch (error) {
+      if (error.response) {
+        console.log("Erro de requisição: ", error.response.status);
+      } else if (error.request) {
+        console.log("Timeout");
+      } else {
+        console.error("Erro inesperado: ", error.message);
+      }
+    }
+  }
+
+  async function registerPlayer() {
+    try {
+      await api.post("/jogadores", player);
+      await loadPlayers();
+    } catch (error) {
+      if (error.response) {
+        console.log("Erro de requisição: ", error.response.status);
+      } else if (error.request) {
+        console.log("Timeout");
+      } else {
+        console.error("Erro inesperado: ", error.message);
+      }
+    }
+  }
+
+  async function editPlayer() {
+    try {
+      await api.put(`/jogadores/${player.id}`, player);
+      await loadPlayers();
+    } catch (error) {
+      if (error.response) {
+        console.log("Erro de requisição: ", error.response.status);
+      } else if (error.request) {
+        console.log("Timeout");
+      } else {
+        console.error("Erro inesperado: ", error.message);
+      }
+    }
+  }
+
+  async function removePlayer(e) {
+    try {
+      await api.delete(`/jogadores/${e.target.id}`);
+      await loadPlayers();
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
@@ -243,7 +281,7 @@ function App() {
 
             <h2 className="display-6 text-center mt-4">Lista de Campeonatos</h2>
             <ChampionshipContext.Provider value={{ setChampionship, setEditingChampionship, removeChampionship, removeTeamChampionship }}>
-              <ChampionshipList championships={championships} teams={participations}></ChampionshipList>
+              <ChampionshipList championships={championships}></ChampionshipList>
             </ChampionshipContext.Provider>
           </div>
 
@@ -257,6 +295,14 @@ function App() {
             <TeamContext.Provider value={{ setTeam, setEditingTeam, removeTeam }}>
               <TeamsList teams={teams}></TeamsList>
             </TeamContext.Provider>
+            
+            <h2 className="mt-4">{!editingPlayer ? "Cadastrar" : "Editar"} Jogador</h2>
+            <PlayerRegister player={player} setPlayer={setPlayer} editingPlayer={editingPlayer} setEditingPlayer={setEditingPlayer} registerPlayer={registerPlayer} editPlayer={editPlayer}></PlayerRegister>
+
+            <h2 className="display-6 text-center mt-4">Lista de Jogadores</h2>
+            <PlayerContext.Provider value={{ setPlayer, setEditingPlayer, removePlayer }}>
+              <PlayersList players={players}></PlayersList>
+            </PlayerContext.Provider>
           </div>
 
         </div>

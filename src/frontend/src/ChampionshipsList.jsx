@@ -1,31 +1,31 @@
 import Championship from "./Championship";
 
 function ChampionshipList(props) {
-    return (
-        <>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nome</th>
-                  <th>Times</th>
-                  <th>Opções</th>
-                </tr>
-              </thead>
-              <tbody>
-                {props.championships.map((championship, index) => (
-                    <Championship
-                        key={index}
-                        id={championship.id}
-                        teams={props.teams.get(championship.id)}
-                        name={championship.nome}
-                    />
-                ))}
-              </tbody>
+  return (
+    <>
+      <table className="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Times</th>
+            <th>Opções</th>
+          </tr>
+        </thead>
+        <tbody>
+          {props.championships.map((championship, index) => (
+            <Championship
+              key={index}
+              id={championship.id}
+              teams={championship.times}
+              name={championship.nome}
+            />
+          ))}
+        </tbody>
 
-            </table>
-        </>
-    )
+      </table>
+    </>
+  )
 }
 
 export default ChampionshipList;

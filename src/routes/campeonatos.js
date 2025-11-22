@@ -229,7 +229,15 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const r = await db.query("SELECT * FROM Campeonato");
-    res.json(r.rows);
+    const campeonatos = r.rows;
+
+    for (const campeonato of campeonatos) {
+      const times = await db.query("SELECT t.id, t.nome FROM Time t JOIN Time_Campeonato p ON p.id_time = t.id WHERE p.id_campeonato = $1", [campeonato.id]);
+
+      campeonato.times = times.rows;
+    }
+
+    res.json(campeonatos);
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }

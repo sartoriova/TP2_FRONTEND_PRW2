@@ -1,9 +1,8 @@
-import { useContext } from "react";
+import { useState, useContext } from "react";
 import { ChampionshipContext } from "./ChampionshipContext";
 
 function Championship(props) {
-    console.log(props.teams);
-    const {setChampionship, setEditingChampionship, removeChampionship, removeTeamChampionship} = useContext(ChampionshipContext);
+    const { setChampionship, setEditingChampionship, removeChampionship, removeTeamChampionship } = useContext(ChampionshipContext);
 
     function editChampionship(e) {
         setEditingChampionship(true);
@@ -17,6 +16,7 @@ function Championship(props) {
 
         setChampionship(newChampionship);
     }
+
 
     return (
         <>
