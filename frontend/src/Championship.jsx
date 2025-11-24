@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { ChampionshipContext } from "./ChampionshipContext";
 
 function Championship(props) {
-    const { setChampionship, setEditingChampionship, removeChampionship, removeTeamChampionship } = useContext(ChampionshipContext);
+    const { setChampionship, setEditingChampionship, removeChampionship, removeParticipation } = useContext(ChampionshipContext);
 
     function editChampionship() {
         setEditingChampionship(true);
@@ -26,7 +26,7 @@ function Championship(props) {
                         {props.teams?.map((team, index) => (
                             <li key={index} id={team.id}>
                                 {team.id} - {team.nome}
-                                <button className="btn btn-link" id={props.id} onClick={removeTeamChampionship}>Remover time</button>
+                                <button className="btn btn-link" id={props.id} onClick={removeParticipation}>Remover time</button>
                             </li>
                         ))}
                     </ul>

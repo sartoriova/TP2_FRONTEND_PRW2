@@ -188,9 +188,18 @@ function App() {
       await api.put(`/jogadores/${player.id}`, player);
       await loadPlayers();
       await loadTeams();
+
+      if (invalidTeam) {
+        setInvalidTeam(false);
+      }
     } catch (error) {
       if (error.response) {
         console.log("Erro de requisição: ", error.response.status);
+
+        if (error.response.status == 404) {
+          setInvalidTeam(true);
+          setErrorMessage(error.response.data.msg);
+        }
       } else if (error.request) {
         console.log("Timeout");
       } else {
